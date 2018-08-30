@@ -32,14 +32,6 @@
   #define MOD_INIT_EXEC(name) init##name();
 #endif
 
-static jmp_buf jbuf;
-
-static
-void _bt_signal_handler(int signo)
-{
-    siglongjmp(jbuf, 1);
-}
-
 /*
 This function is adapted from Eli Berdensky's blogpost:
 https://eli.thegreenplace.net/2015/programmatic-access-to-the-call-stack-in-c/
@@ -54,36 +46,29 @@ size_t backtrace(char *out_records, size_t out_record_size,
   char sym[129];
   size_t remaining = out_record_size;
 
-  // setup signal handler in case that's a signal due to error within the
-  // backtrace code, so we will abort the backtrace and return to user code
-  // without interruption.
-  signal(SIGILL, _bt_signal_handler);
-  signal(SIGSEGV, _bt_signal_handler);
   // Initialize cursor to current frame for local unwinding.
   unw_getcontext(&context);
   unw_init_local(&cursor, &context);
 
-  if ( sigsetjmp(jbuf, !0) == 0) {
-    // Unwind frames one by one, going up the frame stack.
-    for (int ct = 0; ct < maxcount && unw_step(&cursor) > 0; ++ct) {
-      unw_word_t offset, pc;
-      unw_get_reg(&cursor, UNW_REG_IP, &pc);
-      if (pc == 0) {
-        break;
-      }
 
-      size_t used = 0;
-      if (unw_get_proc_name(&cursor, sym, sizeof(sym) - 1, &offset) == 0) {
-          used = snprintf(bufptr, remaining,
-                          "%p:%s+%p\n", (void*)pc, sym, (void*)offset);
-      } else {
-          used = snprintf(bufptr, remaining, "0x%llx: ?\n", pc);
-      }
-      remaining -= used;
-      bufptr += used;
+  // Unwind frames one by one, going up the frame stack.
+  for (int ct = 0; ct < maxcount && unw_step(&cursor) > 0; ++ct) {
+    unw_word_t offset, pc;
+    unw_get_reg(&cursor, UNW_REG_IP, &pc);
+    if (pc == 0) {
+      break;
     }
-  }
 
+    size_t used = 0;
+    if (unw_get_proc_name(&cursor, sym, sizeof(sym) - 1, &offset) == 0) {
+        used = snprintf(bufptr, remaining,
+                        "%p:%s+%p\n", (void*)pc, sym, (void*)offset);
+    } else {
+        used = snprintf(bufptr, remaining, "0x%llx: ?\n", pc);
+    }
+    remaining -= used;
+    bufptr += used;
+  }
   return bufptr - out_records;
 }
 
@@ -101,6 +86,7 @@ void* get_thread_id() {
 
 static int _initialized = 0;
 
+static
 struct {
   pthread_mutex_t mutex;
   char *out_records;
@@ -109,10 +95,18 @@ struct {
   size_t record_written;
   pthread_t calling_thread;
   volatile int spinlock;
+  jmp_buf jbuf;
 } TheSignalConfig;
 
 
 static char _default_buffer[1024 * 100];
+
+
+static
+void _bt_signal_handler(int signo)
+{
+    siglongjmp(TheSignalConfig.jbuf, 1);
+}
 
 static
 void _finalize_thread() {
@@ -154,11 +148,19 @@ void _bt_callback() {
   if (TheSignalConfig.calling_thread == get_thread_id()) {
     return;
   }
-  TheSignalConfig.record_written = backtrace(
-    TheSignalConfig.out_records,
-    TheSignalConfig.out_record_size,
-    TheSignalConfig.maxdepth
-    );
+
+  // setup signal handler in case that's a signal due to error within the
+  // backtrace code, so we will abort the backtrace and return to user code
+  // without interruption.
+  signal(SIGILL, _bt_signal_handler);
+  signal(SIGSEGV, _bt_signal_handler);
+  if ( sigsetjmp(TheSignalConfig.jbuf, !0) == 0) {
+    TheSignalConfig.record_written = backtrace(
+      TheSignalConfig.out_records,
+      TheSignalConfig.out_record_size,
+      TheSignalConfig.maxdepth
+      );
+  }
   // signal the caller
   TheSignalConfig.spinlock = 1;
 }
