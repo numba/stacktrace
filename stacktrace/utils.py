@@ -43,6 +43,8 @@ _maybe_python_names = {
     'call_function',
     'method_call',
     'slot_tp_call',
+    'builtin_exec',
+    'partial_call',
 } | _sure_python_names
 
 
@@ -70,6 +72,17 @@ def skip_python(entry_iter):
     last_is_py = False
     skipped = []
 
+    def show_skipped():
+        repl = '<skipped {} Python entries>'.format(len(skipped))
+        first = skipped[0]
+        del skipped[:]
+        return entry._replace(
+            addr=first.addr,
+            name=repl,
+            offset=0,
+            )
+
+
     for entry in entry_iter:
         if skip_python:
             if last_is_py:
@@ -78,14 +91,12 @@ def skip_python(entry_iter):
                     continue
                 else:
                     if skipped:
-                        repl = '<skipped {} Python entries>'.format(len(skipped))
-                        yield entry._replace(
-                            addr=skipped[0].addr,
-                            name=repl,
-                            offset=0,
-                            )
+                        yield show_skipped()
                     last_is_py = False
                     yield entry
             elif is_python_stack_sure(entry):
                     last_is_py = True
         yield entry
+    else:
+        if skipped:
+            yield show_skipped()
