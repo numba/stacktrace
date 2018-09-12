@@ -10,8 +10,8 @@ def _wrap_fnptr(ptr, restype, *argtypes):
     return proto(ptr)
 
 
-backtrace = _wrap_fnptr(
-    _bt.backtrace,
+backtrace_local = _wrap_fnptr(
+    _bt.backtrace_local,
     # return type
     ctypes.c_size_t,
     # arg types

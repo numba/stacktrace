@@ -32,13 +32,17 @@
   #define MOD_INIT_EXEC(name) init##name();
 #endif
 
+
 /*
 This function is adapted from Eli Berdensky's blogpost:
 https://eli.thegreenplace.net/2015/programmatic-access-to-the-call-stack-in-c/
 Modified to to print data to a buffer.
+
+Note: This function can't be named backtrace() because it conflicts with a
+      Linux symbol.
 */
-size_t backtrace(char *out_records, size_t out_record_size,
-                 int maxcount)
+size_t backtrace_local(char *out_records, size_t out_record_size,
+                       int maxcount)
 {
   unw_cursor_t cursor;
   unw_context_t context;
@@ -49,7 +53,6 @@ size_t backtrace(char *out_records, size_t out_record_size,
   // Initialize cursor to current frame for local unwinding.
   unw_getcontext(&context);
   unw_init_local(&cursor, &context);
-
 
   // Unwind frames one by one, going up the frame stack.
   for (int ct = 0; ct < maxcount && unw_step(&cursor) > 0; ++ct) {
@@ -62,9 +65,10 @@ size_t backtrace(char *out_records, size_t out_record_size,
     size_t used = 0;
     if (unw_get_proc_name(&cursor, sym, sizeof(sym) - 1, &offset) == 0) {
         used = snprintf(bufptr, remaining,
-                        "%p:%s+%p\n", (void*)pc, sym, (void*)offset);
+                        "%p:%s+0x%llx\n", (void*)pc, sym,
+                        (unsigned long long)offset);
     } else {
-        used = snprintf(bufptr, remaining, "0x%llx: ?\n", pc);
+        used = snprintf(bufptr, remaining, "%p: ?\n", (void*)pc);
     }
     remaining -= used;
     bufptr += used;
@@ -77,8 +81,8 @@ size_t backtrace(char *out_records, size_t out_record_size,
 // To use these functionality, initialize_thread() must be called to
 // initialize the subsystem.
 
-void* get_thread_id() {
-  return pthread_self();
+void* get_thread_id(void) {
+  return (void*)pthread_self();
 }
 
 
@@ -93,7 +97,7 @@ struct {
   size_t out_record_size;
   int maxdepth;
   size_t record_written;
-  pthread_t calling_thread;
+  void *calling_thread;
   volatile int spinlock;
   jmp_buf jbuf;
 } TheSignalConfig;
@@ -109,7 +113,7 @@ void _bt_signal_handler(int signo)
 }
 
 static
-void _finalize_thread() {
+void _finalize_thread(void) {
   pthread_mutex_destroy(&TheSignalConfig.mutex);
 }
 
@@ -117,7 +121,7 @@ void _finalize_thread() {
 Non-threadsafe.  Must be called before backtrace_thread() is used.
 Can be invoked multiple times.
 */
-void initialize_thread() {
+void initialize_thread(void) {
   if (_initialized) return;
   _initialized = 1;
 
@@ -144,7 +148,7 @@ int _send_signal_to_thread(void *tid) {
 }
 
 static
-void _bt_callback() {
+void _bt_callback(void) {
   if (TheSignalConfig.calling_thread == get_thread_id()) {
     return;
   }
@@ -155,7 +159,7 @@ void _bt_callback() {
   signal(SIGILL, _bt_signal_handler);
   signal(SIGSEGV, _bt_signal_handler);
   if ( sigsetjmp(TheSignalConfig.jbuf, !0) == 0) {
-    TheSignalConfig.record_written = backtrace(
+    TheSignalConfig.record_written = backtrace_local(
       TheSignalConfig.out_records,
       TheSignalConfig.out_record_size,
       TheSignalConfig.maxdepth
@@ -217,6 +221,8 @@ int backtrace_thread(void* tid, callback_type *cb){
 
 static PyMethodDef ext_methods[] = {};
 
+
+
 MOD_INIT(_bt) {
     PyObject *m;
     MOD_DEF(m, "_bt", "No docs", ext_methods)
@@ -226,7 +232,7 @@ MOD_INIT(_bt) {
     DECLPOINTER(backtrace_thread);
     DECLPOINTER(initialize_thread);
     DECLPOINTER(get_thread_id);
-    DECLPOINTER(backtrace);
+    DECLPOINTER(backtrace_local);
     #undef DECLPOINTER
     return MOD_SUCCESS_VAL(m);
 }

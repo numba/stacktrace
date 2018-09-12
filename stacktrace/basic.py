@@ -14,7 +14,7 @@ def _identity(x):
 def print_stack(file=sys.stdout, size=1024 * 4, maxdepth=100,
                 show_python=True):
     buf = ctypes.create_string_buffer(size)
-    outsz = core.backtrace(buf, size, maxdepth)
+    outsz = core.backtrace_local(buf, size, maxdepth)
     rawtrace = buf[:outsz].decode('ascii')
     pyprocess = _identity if show_python else skip_python
     for entry in pyprocess(simple_processing(rawtrace)):
