@@ -1,20 +1,29 @@
 from collections import namedtuple
 
 
-class StackEntry(namedtuple("StackEntry", "addr,name,offset")):
+class StackEntry(namedtuple("StackEntry", "addr,name,offset,is_python")):
     def __str__(self):
         if self.offset:
             offset = ' +{}'.format(self.offset)
         else:
             offset = ''
-        return '[0x{:x}] {}{}'.format(self.addr, self.name, offset)
-
-
+        if self.is_python:
+            is_python = ' [PY]'
+        else:
+            is_python = ''
+        return '[0x{:x}] {}{}{}'.format(
+            self.addr,
+            self.name,
+            offset,
+            is_python,
+            )
 
 
 def split(rawtrace):
     lines = rawtrace.splitlines()
     for ln in lines:
+        if not ln:
+            continue
         addr, more = ln.split(':', 1)
         where = more.rfind('+')
         if where < 0:
@@ -23,7 +32,7 @@ def split(rawtrace):
         else:
             fname, offset = more.rsplit('+')
             offset = int(offset, 16)
-        entry = StackEntry(int(addr, 16), fname, offset)
+        entry = StackEntry(int(addr, 16), fname, offset, is_python=False)
         yield entry
 
 
@@ -80,8 +89,8 @@ def skip_python(entry_iter):
             addr=first.addr,
             name=repl,
             offset=0,
+            is_python=True,
             )
-
 
     for entry in entry_iter:
         if skip_python:
@@ -95,7 +104,8 @@ def skip_python(entry_iter):
                     last_is_py = False
                     yield entry
             elif is_python_stack_sure(entry):
-                    last_is_py = True
+                last_is_py = True
+                entry = entry._replace(is_python=True)
         yield entry
     else:
         if skipped:
