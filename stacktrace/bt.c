@@ -70,8 +70,15 @@ size_t backtrace_local(char *out_records, size_t out_record_size,
     } else {
         used = snprintf(bufptr, remaining, "%p: ?\n", (void*)pc);
     }
-    remaining -= used;
-    bufptr += used;
+    if (used >= remaining) {
+        // if over printed
+        remaining = 0;
+        bufptr[0] = '\0';
+        break;
+    } else {
+        remaining -= used;
+        bufptr += used;
+    }
   }
   return bufptr - out_records;
 }
