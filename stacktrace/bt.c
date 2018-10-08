@@ -193,7 +193,7 @@ Returns
   1: success
   0: fail
 */
-int backtrace_thread(void* tid, callback_type *cb){
+int backtrace_thread(void* tid, callback_type *cb, int maxdepth){
   // Pre-check
   void* this_thread = get_thread_id();
   // disallow calling on the same thread
@@ -204,6 +204,7 @@ int backtrace_thread(void* tid, callback_type *cb){
   pthread_mutex_lock(&TheSignalConfig.mutex);
   TheSignalConfig.spinlock = 0;
   TheSignalConfig.calling_thread = this_thread;
+  TheSignalConfig.maxdepth = maxdepth;
 
   struct sigaction oldsa;
   _setup_signal_handler(_bt_callback, &oldsa);

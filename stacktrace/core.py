@@ -24,7 +24,7 @@ backtrace_thread = _wrap_fnptr(
     # return type
     ctypes.c_int,
     # arg types
-    ctypes.c_void_p, ctypes.c_void_p,
+    ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int,
 )
 
 
