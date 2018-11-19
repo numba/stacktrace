@@ -1,7 +1,8 @@
 from __future__ import division
+
 import threading
 import time
-from stacktrace.core import backtrace_thread, get_thread_id, bt_callback
+
 from stacktrace.basic import DEFAULT_MAXDEPTH, get_thread_stack
 from stacktrace._docutils import apply_doc
 
@@ -24,7 +25,7 @@ class Timer(object):
             A list of *StackEntries* will be passed in.
             It will be called upon every stacktrace with the trace info
             as a string.
-        internval : float
+        interval : float
             Sampling frequency in seconds.  Default to 1/20 (i.e. 20Hz).
             The value is passed to `time.sleep()`.
         {doc_maxdepth}

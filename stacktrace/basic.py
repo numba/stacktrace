@@ -3,7 +3,6 @@ from __future__ import print_function
 import ctypes
 import sys
 import threading
-from io import StringIO
 
 from . import core
 from .utils import simple_processing, skip_python

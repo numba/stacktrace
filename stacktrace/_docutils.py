@@ -1,7 +1,7 @@
 
-from functools import wraps, lru_cache
-from textwrap import dedent, indent
 import re
+from functools import lru_cache
+from textwrap import dedent, indent
 
 
 doc_file = """

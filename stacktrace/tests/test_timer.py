@@ -1,38 +1,12 @@
 import threading
-import os
-import re
-import string
-import random
 
-from stacktrace.core import get_thread_id
 from stacktrace.tools import Timer
-from stacktrace.utils import simple_processing, skip_python, StackEntry
+from stacktrace.utils import StackEntry
+from .threadwork import get_thread_work_func
 
 
 def test_timer():
-    def gen(n):
-        # Generate some data
-        text = [string.ascii_letters for i in range(n)]
-        random.shuffle(text)
-        return ''.join(text)
-
-    def work():
-        pat = re.compile(r'\w+')
-        out = []
-        for i in range(100):
-            data = gen(i)
-            m = pat.match(gen(i))
-            if m:
-                out.append(m.group(0))
-        return out
-
-
-    def other_thread():
-        out = []
-        for i in range(100):
-            out.append(work())
-
-    th = threading.Thread(target=other_thread)
+    th = threading.Thread(target=get_thread_work_func())
     th.start()
     tid = th.ident
 
