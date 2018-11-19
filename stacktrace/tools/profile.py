@@ -1,5 +1,5 @@
-from stacktrace.timer import Timer
 from stacktrace.utils import simple_processing, skip_python
+from . import Timer
 
 
 def base_address(entry):

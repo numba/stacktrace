@@ -93,8 +93,12 @@ def get_thread_stack(tid, maxdepth=DEFAULT_MAXDEPTH, show_python=True):
 
         rawlog = []
         cb = core.bt_callback(handler)
-        core.backtrace_thread(tid, cb, maxdepth)
-        rawtrace = rawlog.pop()
+        if core.backtrace_thread(tid, cb, maxdepth):
+            rawtrace = rawlog.pop()
+        else:
+            # Target thread is gone.  Trigger of backtrace failed.
+            rawtrace = ''
+
 
     # Process
     pyprocess = _identity if show_python else skip_python
