@@ -27,5 +27,10 @@ setup(
     description='Low-level stacktraces in Python',
     author='Siu Kwan Lam',
     long_description=readmetext,
+    packages=[
+        'stacktrace',
+        'stacktrace.tools',
+        'stacktrace.tests',
+        ],
     ext_modules=[module_bt],
 )
