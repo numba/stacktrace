@@ -27,4 +27,3 @@ def test_timer():
     # check that the traces are well-formed
     for stack in non_empty_traces:
         assert all(isinstance(x, StackEntry) for x in stack)
-

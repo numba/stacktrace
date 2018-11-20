@@ -7,7 +7,6 @@ from stacktrace.basic import DEFAULT_MAXDEPTH, get_thread_stack
 from stacktrace._docutils import apply_doc
 
 
-
 class Timer(object):
     """A Timer object that repeatedly invoke backtrace on a target thread
     at a given frequency.

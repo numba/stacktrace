@@ -11,6 +11,7 @@ from stacktrace import (
     print_thread_stack,
 )
 
+
 def verify_stack_buffer(output):
     assert len(output) > 0
     lines = output.splitlines()
