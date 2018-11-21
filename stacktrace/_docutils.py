@@ -6,7 +6,7 @@ from textwrap import dedent, indent
 
 doc_file = """
 file : fileobj
-    The file object to print to.
+    The file object to print to.  Defaults to ``sys.stdout``.
 """.strip()
 
 doc_maxdepth = """

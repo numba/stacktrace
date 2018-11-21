@@ -28,7 +28,7 @@ def _get_local_stack(bufsize, maxdepth):
 
 
 @apply_doc
-def print_stack(file=sys.stdout, maxdepth=DEFAULT_MAXDEPTH,
+def print_stack(file=None, maxdepth=DEFAULT_MAXDEPTH,
                 show_python=True, _bufsize=DEFAULT_BUFSIZE):
     """Print the stack of the current thread.
 
@@ -38,13 +38,15 @@ def print_stack(file=sys.stdout, maxdepth=DEFAULT_MAXDEPTH,
     {doc_maxdepth}
     {doc_show_python}
     """
+    file = file or sys.stdout
     rawtrace = _get_local_stack(bufsize=_bufsize, maxdepth=maxdepth)
     pyprocess = _identity if show_python else skip_python
     for entry in pyprocess(simple_processing(rawtrace)):
         print(entry, file=file)
 
 
-def print_thread_stack(tid, file=sys.stdout, maxdepth=DEFAULT_MAXDEPTH,
+@apply_doc
+def print_thread_stack(tid, file=None, maxdepth=DEFAULT_MAXDEPTH,
                        show_python=True):
     """Print the stack of the target thread
 
@@ -56,6 +58,7 @@ def print_thread_stack(tid, file=sys.stdout, maxdepth=DEFAULT_MAXDEPTH,
     {doc_maxdepth}
     {doc_show_python}
     """
+    file = file or sys.stdout
     entries = get_thread_stack(
         tid=tid,
         maxdepth=maxdepth,
@@ -65,6 +68,7 @@ def print_thread_stack(tid, file=sys.stdout, maxdepth=DEFAULT_MAXDEPTH,
         print(entry, file=file)
 
 
+@apply_doc
 def get_thread_stack(tid, maxdepth=DEFAULT_MAXDEPTH, show_python=True):
     """Get the stack of the target thread
 
@@ -97,7 +101,6 @@ def get_thread_stack(tid, maxdepth=DEFAULT_MAXDEPTH, show_python=True):
         else:
             # Target thread is gone.  Trigger of backtrace failed.
             rawtrace = ''
-
 
     # Process
     pyprocess = _identity if show_python else skip_python

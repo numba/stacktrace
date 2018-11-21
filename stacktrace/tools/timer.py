@@ -7,44 +7,29 @@ from stacktrace.basic import DEFAULT_MAXDEPTH, get_thread_stack
 from stacktrace._docutils import apply_doc
 
 
+@apply_doc
 class Timer(object):
     """A Timer object that repeatedly invoke backtrace on a target thread
     at a given frequency.
+
+    Parameters
+    ----------
+    tid : int
+        Target thread id.
+    func : callable
+        A callback function that takes a single argument.
+        A list of ``StackEntries`` will be passed in.
+        It will be called upon every stacktrace with the trace info
+        as a string.
+    interval : float
+        Sampling frequency in seconds.  Default to 1/20 (i.e. 20Hz).
+        The value is passed to ``time.sleep()``.
+    {doc_maxdepth}
+    {doc_show_python}
+
     """
-    @apply_doc
     def __init__(self, tid, func, interval=1/20,
                  maxdepth=DEFAULT_MAXDEPTH, show_python=True):
-        """
-        Parameters
-        ----------
-        tid : int
-            Target thread id.
-        func : callable
-            A callback function that takes a single argument.
-            A list of *StackEntries* will be passed in.
-            It will be called upon every stacktrace with the trace info
-            as a string.
-        interval : float
-            Sampling frequency in seconds.  Default to 1/20 (i.e. 20Hz).
-            The value is passed to `time.sleep()`.
-        {doc_maxdepth}
-        {doc_show_python}
-
-        Example
-        -------
-
-        Use as context-manager:
-
-            with Timer(tid, print):
-                code_to_be_traced()
-
-        Use with explicit .start() and .join():
-
-            timer = Timer(tid, print)
-            timer.start()
-            code_to_be_traced()
-            timer.join()
-        """
         self._tid = tid
         self._interval = interval
         self._func = func

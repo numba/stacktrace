@@ -6,7 +6,7 @@ from stacktrace.basic import (
 
 
 __all__ = [
-    print_stack,
-    print_thread_stack,
-    get_thread_stack,
+    'print_stack',
+    'print_thread_stack',
+    'get_thread_stack',
 ]
