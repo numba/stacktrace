@@ -1,0 +1,11 @@
+name: rtd_docs_py35
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python=3.5.*
+- libunwind
+- pip:
+  - numpydoc
+  - sphinx
+  - sphinx-rtd-theme

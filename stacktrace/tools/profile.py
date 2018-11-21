@@ -45,10 +45,10 @@ class Profiler(object):
     def get_result(self):
         """Get the stacktrace result as a dict.
 
-        Example
-        -------
+        Examples
+        --------
 
-        Sample data:
+        Sample data::
 
             {4317941904: {'count': 3, 'name': 'method_get'},
              4318042736: {'count': 1, 'name': 'frame_dealloc'},

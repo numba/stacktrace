@@ -1,0 +1,8 @@
+build:
+   image: latest
+
+python:
+   version: 3.5
+
+conda:
+   file: conda_environments/rtd_docs_py35.yml
