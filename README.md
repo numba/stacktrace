@@ -1,5 +1,7 @@
 # StackTrace
 
+[![Build Status](https://travis-ci.org/numba/stacktrace.svg?branch=master)](https://travis-ci.org/numba/stacktrace)
+
 Provide facility to obtain low-level stacktraces from within Python.
 
 This project relies on *libunwind*, which works on Unix-like and OSX system.
