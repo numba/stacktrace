@@ -1,5 +1,18 @@
+import os
 import ctypes
-from . import _bt
+
+# Detect on RTD
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+try:
+    from . import _bt
+except ImportError:
+    # Change C-extension behavior on readthedocs
+    if not on_rtd:
+        # Re-raise if not on RTD
+        raise
+    else:
+        # Import mock module
+        from . import _bt_mock as _bt
 
 
 bt_callback = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_size_t)
@@ -44,4 +57,5 @@ initialize_thread = _wrap_fnptr(
 )
 
 # Initialize
-initialize_thread()
+if not on_rtd:
+    initialize_thread()
