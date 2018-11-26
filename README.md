@@ -1,10 +1,16 @@
 # StackTrace
 
 [![Build Status](https://travis-ci.org/numba/stacktrace.svg?branch=master)](https://travis-ci.org/numba/stacktrace)
-
+[![Documentation Status](https://readthedocs.org/projects/stacktrace/badge/?version=latest)](https://stacktrace.readthedocs.io/en/latest/?badge=latest)
+    
 Provide facility to obtain low-level stacktraces from within Python.
 
 This project relies on *libunwind*, which works on Unix-like and OSX system.
+
+Supports:
+
+* Python >= 3
+* Linux and OSX
 
 ## Features
 
@@ -25,5 +31,13 @@ conda install -c defaults -c conda-forge libunwind
 
 # Install
 
+## From anaconda.org
+
+```bash
+conda install -defaults -c numba -c conda-forge stacktrace
+```
+
+## From Source
 Once you have the dependencies, you can run `python setup.py install` to
 install into your python package directory.
+
