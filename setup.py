@@ -25,7 +25,7 @@ setup(
     name='stacktrace',
     version='0.1',
     description='Low-level stacktraces in Python',
-    author='Siu Kwan Lam',
+    author='Anaconda, Inc',
     long_description=readmetext,
     packages=[
         'stacktrace',

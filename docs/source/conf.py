@@ -13,15 +13,15 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'stacktrace'
-copyright = '2018, Siu Kwan Lam'
-author = 'Siu Kwan Lam'
+copyright = '2018, Anaconda, Inc'
+author = 'Anaconda, Inc'
 
 # The short X.Y version
 version = ''
@@ -145,7 +145,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'stacktrace.tex', 'stacktrace Documentation',
-     'Siu Kwan Lam', 'manual'),
+     'Anaconda, Inc', 'manual'),
 ]
 
 
