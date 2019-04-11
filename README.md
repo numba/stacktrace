@@ -34,7 +34,7 @@ conda install -c defaults -c conda-forge libunwind
 ## From anaconda.org
 
 ```bash
-conda install -defaults -c numba -c conda-forge stacktrace
+conda install -c defaults -c numba -c conda-forge stacktrace
 ```
 
 ## From Source
